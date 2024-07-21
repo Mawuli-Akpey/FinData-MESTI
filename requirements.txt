@@ -1,5 +1,7 @@
+streamlit
+requests
 pandas
 numpy
-requests
 plotly
-requests
+matplotlib
+seaborn
