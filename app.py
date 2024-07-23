@@ -44,6 +44,10 @@ df['_submitted_by'] = df['_submitted_by'].replace(enumerator_dict)
 df['start'] = pd.to_datetime(df['start'], errors='coerce')
 df['end'] = pd.to_datetime(df['end'], errors='coerce')
 
+# Separate valid and invalid datetime entries
+valid_df = df.dropna(subset=['start'])
+invalid_df = df[df['start'].isna()]
+
 # Date input from user
 start_date = st.sidebar.date_input("Start Date", pd.to_datetime("2024-07-21"))
 end_date = st.sidebar.date_input("End Date", pd.to_datetime("2024-07-22"))
@@ -52,8 +56,11 @@ end_date = st.sidebar.date_input("End Date", pd.to_datetime("2024-07-22"))
 start_datetime = pd.to_datetime(start_date)
 end_datetime = pd.to_datetime(end_date) + pd.DateOffset(days=1) - pd.Timedelta(seconds=1)  # Include the entire end date
 
-# Filter the DataFrame based on the selected date range
-df = df[(df['start'] >= start_datetime) & (df['start'] <= end_datetime)]
+# Filter the valid DataFrame based on the selected date range
+filtered_valid_df = valid_df[(valid_df['start'] >= start_datetime) & (valid_df['start'] <= end_datetime)]
+
+# Concatenate the filtered valid entries with the invalid entries
+df = pd.concat([filtered_valid_df, invalid_df])
 
 # Calculate form completion time in minutes
 df['form_complete_time'] = (df['end'] - df['start']).dt.total_seconds() / 60
