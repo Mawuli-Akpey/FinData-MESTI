@@ -54,13 +54,13 @@ end_time = st.sidebar.text_input("End Time (HH:MM:SS:SS)", "23:59:59:00")
 try:
     start_datetime = pd.to_datetime(f"{start_date} {start_time}", format='%Y-%m-%d %H:%M:%S:%f')
     end_datetime = pd.to_datetime(f"{end_date} {end_time}", format='%Y-%m-%d %H:%M:%S:%f')
-    
+
     if start_datetime > end_datetime:
         st.error("Start datetime must be before end datetime")
     else:
         # Filter the DataFrame based on the selected datetime range
         filtered_df = df[(df['start'] >= start_datetime) & (df['start'] <= end_datetime)]
-        
+
         # Calculate form completion time in minutes for the filtered DataFrame
         filtered_df['form_complete_time'] = (filtered_df['end'] - filtered_df['start']).dt.total_seconds() / 60
 
@@ -69,7 +69,7 @@ try:
         st.dataframe(filtered_df)
 
         # Save the filtered DataFrame to a new CSV file (if needed)
-        #filtered_df.to_csv('filtered_data.csv', index=False)
+        # filtered_df.to_csv('filtered_data.csv', index=False)
 
         # Calculate the required metrics
         total_submissions = len(filtered_df)
@@ -187,7 +187,7 @@ try:
                      title='Total Number of Different Financial Services Registered',
                      labels={'Financial Service': 'Financial Service', 'Count': 'Number of Registrations'},
                      text='Count')
-                st.plotly_chart(fig)
+        st.plotly_chart(fig)
 
         # Plot average yearly income from farming activities
         income_column = 'What is your average yearly income from farming activities?'
