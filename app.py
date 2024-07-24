@@ -54,7 +54,10 @@ start_datetime = pd.to_datetime(start_date)
 end_datetime = pd.to_datetime(end_date) + pd.DateOffset(days=1) - pd.Timedelta(seconds=1)  # Include the entire end date
 
 # Filter the DataFrame based on the selected date range
-df = df[(df['start'] >= start_datetime) & (df['start'] <= end_datetime)]
+filtered_df = df[(df['start'] >= start_datetime) & (df['start'] <= end_datetime)]
+
+# Combine filtered valid rows with invalid datetime rows
+df = pd.concat([filtered_df, df[df['start'].isna()]])
 
 # Display the filtered DataFrame
 st.write(f"Showing data from {start_date} to {end_date}")
