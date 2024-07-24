@@ -44,25 +44,26 @@ df['_submitted_by'] = df['_submitted_by'].replace(enumerator_dict)
 df['start'] = pd.to_datetime(df['start'], errors='coerce')
 df['end'] = pd.to_datetime(df['end'], errors='coerce')
 
+# User input for start and end datetime
+start_datetime_str = st.sidebar.text_input("Start Datetime (YYYY-MM-DD HH:MM:SS)", "2024-07-21 00:00:00")
+end_datetime_str = st.sidebar.text_input("End Datetime (YYYY-MM-DD HH:MM:SS)", "2024-07-22 23:59:59")
 
-# Date input from user
-start_date = st.sidebar.date_input("Start Date", pd.to_datetime("2024-07-21"))
-end_date = st.sidebar.date_input("End Date", pd.to_datetime("2024-07-22"))
+# Convert the input strings to datetime
+start_datetime = pd.to_datetime(start_datetime_str, errors='coerce')
+end_datetime = pd.to_datetime(end_datetime_str, errors='coerce')
 
-# Convert the input dates to datetime
-start_datetime = pd.to_datetime(start_date)
-end_datetime = pd.to_datetime(end_date) + pd.DateOffset(days=1) - pd.Timedelta(seconds=1)  # Include the entire end date
+if start_datetime is pd.NaT or end_datetime is pd.NaT:
+    st.error("Please enter valid datetime strings in the format YYYY-MM-DD HH:MM:SS")
+else:
+    # Filter the DataFrame based on the selected datetime range
+    filtered_df = df[(df['start'] >= start_datetime) & (df['start'] <= end_datetime)]
 
-# Filter the DataFrame based on the selected date range
-filtered_df = df[(df['start'] >= start_datetime) & (df['start'] <= end_datetime)]
+    # Combine filtered valid rows with invalid datetime rows
+    df = pd.concat([filtered_df, df[df['start'].isna()]])
 
-# Combine filtered valid rows with invalid datetime rows
-df = pd.concat([filtered_df, df[df['start'].isna()]])
-
-# Display the filtered DataFrame
-st.write(f"Showing data from {start_date} to {end_date}")
-st.dataframe(df)
-
+    # Display the filtered DataFrame
+    st.write(f"Showing data from {start_datetime} to {end_datetime}")
+    st.dataframe(df)
 
 # Calculate form completion time in minutes
 df['form_complete_time'] = (df['end'] - df['start']).dt.total_seconds() / 60
