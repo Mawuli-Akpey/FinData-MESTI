@@ -75,7 +75,7 @@ except ValueError:
 
 
 # Calculate form completion time in minutes
-df['form_complete_time'] = (df['end'] - df['start']).dt.total_seconds() / 60
+df['form_complete_time'] = (filtered_df['end'] - filtered_df['start']).dt.total_seconds() / 60
 
 # Calculate the required metrics
 total_submissions = len(df)
