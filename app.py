@@ -61,25 +61,27 @@ try:
         # Filter the DataFrame based on the selected datetime range
         filtered_df = df[(df['start'] >= start_datetime) & (df['start'] <= end_datetime)]
         
-        # Combine filtered valid rows with invalid datetime rows
-        df = pd.concat([filtered_df, df[df['start'].isna()]])
+        # Calculate form completion time in minutes for the filtered DataFrame
+        filtered_df['form_complete_time'] = (filtered_df['end'] - filtered_df['start']).dt.total_seconds() / 60
 
         # Display the filtered DataFrame
         st.write(f"Showing data from {start_datetime} to {end_datetime}")
-        st.dataframe(df)
+        st.dataframe(filtered_df)
 
         # Save the filtered DataFrame to a new CSV file (if needed)
-        #df.to_csv('filtered_data.csv', index=False)
+        #filtered_df.to_csv('filtered_data.csv', index=False)
+
+        # Calculate the required metrics
+        total_submissions = len(filtered_df)
+        average_form_complete_time = filtered_df['form_complete_time'].mean()
+
+        # Display metrics
+        st.write(f"Total Submissions: {total_submissions}")
+        st.write(f"Average Form Complete Time (minutes): {average_form_complete_time:.2f}")
 except ValueError:
     st.error("Please enter valid time strings in the format HH:MM:SS:SS")
 
 
-# Calculate form completion time in minutes
-df['form_complete_time'] = (filtered_df['end'] - filtered_df['start']).dt.total_seconds() / 60
-
-# Calculate the required metrics
-total_submissions = len(df)
-average_form_complete_time = df['form_complete_time'].mean()
 total_males = df['Participant Gender'].str.contains('Male', na=False).sum()
 total_females = df['Participant Gender'].str.contains('Female', na=False).sum()
 
