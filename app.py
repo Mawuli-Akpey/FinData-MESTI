@@ -46,14 +46,14 @@ df['end'] = pd.to_datetime(df['end'], errors='coerce')
 
 # Date and time input from user
 start_date = st.sidebar.date_input("Start Date", pd.to_datetime("2024-07-21"))
-start_time = st.sidebar.text_input("Start Time(HH:MM:SS)", "00:00:00:00")
+start_time = st.sidebar.text_input("Start Time (HH:MM:SS:SS)", "00:00:00:00")
 end_date = st.sidebar.date_input("End Date", pd.to_datetime("2024-07-22"))
-end_time = st.sidebar.text_input("End Time(HH:MM:SS)", "23:59:59:00")
+end_time = st.sidebar.text_input("End Time (HH:MM:SS:SS)", "23:59:59:00")
 
 # Combine date and time inputs into datetime objects
 try:
-    start_datetime = pd.to_datetime(f"{start_date} {start_time}", format='%Y-%m-%d %H:%M:%S')
-    end_datetime = pd.to_datetime(f"{end_date} {end_time}", format='%Y-%m-%d %H:%M:%S')
+    start_datetime = pd.to_datetime(f"{start_date} {start_time}", format='%Y-%m-%d %H:%M:%S:%f')
+    end_datetime = pd.to_datetime(f"{end_date} {end_time}", format='%Y-%m-%d %H:%M:%S:%f')
     
     if start_datetime > end_datetime:
         st.error("Start datetime must be before end datetime")
@@ -71,7 +71,8 @@ try:
         # Save the filtered DataFrame to a new CSV file (if needed)
         #df.to_csv('filtered_data.csv', index=False)
 except ValueError:
-    st.error("Please enter valid time strings in the format HH:MM:SS")
+    st.error("Please enter valid time strings in the format HH:MM:SS:SS")
+
 
 # Calculate form completion time in minutes
 df['form_complete_time'] = (df['end'] - df['start']).dt.total_seconds() / 60
