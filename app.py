@@ -46,9 +46,9 @@ df['end'] = pd.to_datetime(df['end'], errors='coerce')
 
 # Date and time input from user
 start_date = st.sidebar.date_input("Start Date", pd.to_datetime("2024-07-21"))
-start_time = st.sidebar.text_input("Start Time (HH:MM:SS)", "00:00:00")
+start_time = st.sidebar.text_input("Start Time(HH:MM:SS)", "00:00:00:00")
 end_date = st.sidebar.date_input("End Date", pd.to_datetime("2024-07-22"))
-end_time = st.sidebar.text_input("End Time (HH:MM:SS)", "23:59:59")
+end_time = st.sidebar.text_input("End Time(HH:MM:SS)", "23:59:59:00")
 
 # Combine date and time inputs into datetime objects
 try:
