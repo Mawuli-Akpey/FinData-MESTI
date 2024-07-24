@@ -19,8 +19,20 @@ else:
     
 
 
-# Display the DataFrame
-st.dataframe(df.head())
+# Convert start and end times to datetime
+df['start'] = pd.to_datetime(df['start'], errors='coerce')
+df['end'] = pd.to_datetime(df['end'], errors='coerce')
+
+# Date range selection
+st.sidebar.header('Filter by Date')
+start_date = st.sidebar.date_input('Start Date', df['start'].min().date())
+end_date = st.sidebar.date_input('End Date', df['end'].max().date())
+
+# Filter the DataFrame based on the selected date range
+df_filtered = df[(df['start'].dt.date >= start_date) & (df['end'].dt.date <= end_date)]
+
+# Display the filtered DataFrame
+st.dataframe(df_filtered.head())
 
 # Dictionary to substitute enumerator names
 enumerator_dict = {
@@ -35,53 +47,60 @@ enumerator_dict = {
     'enuma010': 'Joseph',
     'enuma011': 'Gifty'
 }
+
 # Replace the enumerator names
-df['_submitted_by'] = df['_submitted_by'].replace(enumerator_dict)
-# Convert start and end times to datetime
-df['start'] = pd.to_datetime(df['start'], errors='coerce')
-df['end'] = pd.to_datetime(df['end'], errors='coerce')
+df_filtered['_submitted_by'] = df_filtered['_submitted_by'].replace(enumerator_dict)
+
 # Calculate form completion time in minutes
-df['form_complete_time'] = (df['end'] - df['start']).dt.total_seconds() / 60
+df_filtered['form_complete_time'] = (df_filtered['end'] - df_filtered['start']).dt.total_seconds() / 60
+
 # Calculate the required metrics
-total_submissions = len(df)
-average_form_complete_time = df['form_complete_time'].mean()
-total_males = df['Participant Gender'].str.contains('Male', na=False).sum()
-total_females = df['Participant Gender'].str.contains('Female', na=False).sum()
+total_submissions = len(df_filtered)
+average_form_complete_time = df_filtered['form_complete_time'].mean()
+total_males = df_filtered['Participant Gender'].str.contains('Male', na=False).sum()
+total_females = df_filtered['Participant Gender'].str.contains('Female', na=False).sum()
+
 # Display metrics
 st.write("### Metrics")
 st.metric("Total Submissions", total_submissions)
 st.metric("Avg. Form Complete Time (mins)", round(average_form_complete_time, 2))
 st.metric("Total Males", total_males)
 st.metric("Total Females", total_females)
+
 # Count submissions by each enumerator
-submission_counts = df['_submitted_by'].value_counts().reset_index()
+submission_counts = df_filtered['_submitted_by'].value_counts().reset_index()
 submission_counts.columns = ['Enumerator', 'Number of Submissions']
+
 # Plot submissions by each enumerator
 fig = px.bar(submission_counts, x='Enumerator', y='Number of Submissions',
              title='Submissions by Each Enumerator',
              labels={'Number of Submissions': 'Number of Submissions'},
              text='Number of Submissions')
 st.plotly_chart(fig)
+
 # Calculate the average form complete time per enumerator
-average_time_per_enumerator = df.groupby('_submitted_by')['form_complete_time'].mean().reset_index()
+average_time_per_enumerator = df_filtered.groupby('_submitted_by')['form_complete_time'].mean().reset_index()
 average_time_per_enumerator.columns = ['Enumerator', 'Average Form Complete Time (mins)']
 average_time_per_enumerator['Average Form Complete Time (mins)'] = average_time_per_enumerator['Average Form Complete Time (mins)'].round(2)
+
 # Plot average form complete time per enumerator
 fig = px.bar(average_time_per_enumerator, x='Enumerator', y='Average Form Complete Time (mins)',
              title='Average Form Complete Time per Enumerator',
              labels={'Average Form Complete Time (mins)': 'Average Form Complete Time (mins)'},
              text='Average Form Complete Time (mins)')
 st.plotly_chart(fig)
+
 # Plot the distribution of ages
-fig = px.histogram(df, x='Participant Age in years',
+fig = px.histogram(df_filtered, x='Participant Age in years',
                    title='Age Distribution of Participants',
                    labels={'Participant Age in years': 'Age (years)'},
                    nbins=20,
                    marginal='box',
                    color_discrete_sequence=['skyblue'])
 st.plotly_chart(fig)
+
 # Plot the distribution of ages by gender
-fig = px.histogram(df, x='Participant Age in years', color='Participant Gender',
+fig = px.histogram(df_filtered, x='Participant Age in years', color='Participant Gender',
                    title='Age Distribution of Participants by Gender',
                    labels={'Participant Age in years': 'Age (years)', 'Participant Gender': 'Gender'},
                    nbins=20,
@@ -89,16 +108,18 @@ fig = px.histogram(df, x='Participant Age in years', color='Participant Gender',
                    opacity=0.3,
                    color_discrete_sequence=px.colors.qualitative.Set1)
 st.plotly_chart(fig)
+
 # Plot the registration on Agritech e-commerce platforms
-platform_registration_counts = df['Are you registered on any Agritech e-commerce platform?'].value_counts().reset_index()
+platform_registration_counts = df_filtered['Are you registered on any Agritech e-commerce platform?'].value_counts().reset_index()
 platform_registration_counts.columns = ['Response', 'Count']
 fig = px.bar(platform_registration_counts, x='Response', y='Count',
              title='Registration on Agritech E-commerce Platforms',
              labels={'Response': 'Registered on Agritech E-commerce Platform?', 'Count': 'Number of Participants'},
              text='Count')
 st.plotly_chart(fig)
+
 # Plot average form completion time by e-commerce platform registration
-grouped_df = df.groupby(['_submitted_by', 'Are you registered on any Agritech e-commerce platform?'])['form_complete_time'].mean().reset_index()
+grouped_df = df_filtered.groupby(['_submitted_by', 'Are you registered on any Agritech e-commerce platform?'])['form_complete_time'].mean().reset_index()
 grouped_df['form_complete_time'] = grouped_df['form_complete_time'].round(2)
 grouped_df.columns = ['Enumerator', 'Registered on E-commerce Platform', 'Average Form Complete Time (mins)']
 fig = px.bar(grouped_df, x='Enumerator', y='Average Form Complete Time (mins)',
@@ -108,7 +129,6 @@ fig = px.bar(grouped_df, x='Enumerator', y='Average Form Complete Time (mins)',
              labels={'Average Form Complete Time (mins)': 'Average Form Complete Time (mins)', 'Enumerator': 'Enumerator'},
              text='Average Form Complete Time (mins)')
 st.plotly_chart(fig)
-
 
 
 
