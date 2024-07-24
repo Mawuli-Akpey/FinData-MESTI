@@ -34,8 +34,8 @@ enumerator_dict = {
 # Replace the enumerator names
 df['_submitted_by'] = df['_submitted_by'].replace(enumerator_dict)
 # Convert start and end times to datetime
-df['start'] = pd.to_datetime(df['start'])
-df['end'] = pd.to_datetime(df['end'])
+df['start'] = pd.to_datetime(df['start'], errors='coerce')
+df['end'] = pd.to_datetime(df['end'], errors='coerce')
 # Calculate form completion time in minutes
 df['form_complete_time'] = (df['end'] - df['start']).dt.total_seconds() / 60
 # Calculate the required metrics
