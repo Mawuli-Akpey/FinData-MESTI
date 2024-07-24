@@ -16,8 +16,12 @@ if response.status_code == 200:
     df = pd.read_csv(io.StringIO(response.content.decode('utf-8')), delimiter=";")
 else:
     st.error(f"Failed to retrieve data: {response.status_code}")
+    
+
+
 # Display the DataFrame
 st.dataframe(df.head())
+
 # Dictionary to substitute enumerator names
 enumerator_dict = {
     'enuma002': 'Afishietu',
@@ -104,6 +108,10 @@ fig = px.bar(grouped_df, x='Enumerator', y='Average Form Complete Time (mins)',
              labels={'Average Form Complete Time (mins)': 'Average Form Complete Time (mins)', 'Enumerator': 'Enumerator'},
              text='Average Form Complete Time (mins)')
 st.plotly_chart(fig)
+
+
+
+
 # Plot the count of different crops cultivated
 df['<span style="display:none">row-Crop Type</span>'] = df['<span style="display:none">row-Crop Type</span>'].apply(lambda s: re.sub(r'\s+', '', s).title() if pd.notnull(s) else s)
 crop_counts = df['<span style="display:none">row-Crop Type</span>'].value_counts().reset_index()
